@@ -17,17 +17,26 @@ function calcMonthlyPayment()
     
     //Get Periodic Interest Rate which is rate/how often rate is compounded
     let periodicIntRate = getPeriodicRate(strCompound, dblRate);
-    console.log(`Periodic Int Rate: ${periodicIntRate}`);
+    //console.log(`Periodic Int Rate: ${periodicIntRate}`);
     
     //need to get to total number of payment periods
     let totalNumPayments = getTotalNumPayments(intYears, intMonths, strPayBack);
-    console.log(`Total Num Payments: ${totalNumPayments}`);    
+    //console.log(`Total Num Payments: ${totalNumPayments}`);    
     
     //Get monthly payment using formula:
     let monthlyPayment = getMonthlyPayment(dblLoanAmount, periodicIntRate, totalNumPayments);
-    console.log(`Monthly Payment: ${monthlyPayment}`);
+    //console.log(`Monthly Payment: ${monthlyPayment}`);
     
-    getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);
+    //Separate amount of each payment that pays down the balance and what part is interest
+    const objAmortizedPayments = getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);
+    //console.log(objAmortizedPayments.arrInterest);
+    //console.log(`Array principal payments: ${objAmortizedPayments.arrPrincipal}`);
+    
+    //In order to create an annual amortization table you'll need the annual
+    //sums of interest and principal amounts paid out
+    const arrAnnualSums = getAnnualSums(objAmortizedPayments, strPayBack);
+    console.log(arrAnnualSums);
+    showPieGraph(arrAnnualSums);
     
     
 //    console.log(`
@@ -163,8 +172,6 @@ function getMonthlyPayment(a,r,n){
 
 function getAmortizedPayments(periodicIntRate, loanAmount, numPayments, monthlyPayment)
 {
-//    const arrIntPayments=[];
-//    const arrPrincipalPayments=[];
     const amortizedPayments={
         arrInterest:[],
         arrPrincipal:[]
@@ -184,12 +191,71 @@ function getAmortizedPayments(periodicIntRate, loanAmount, numPayments, monthlyP
         curPrincipal = curPrincipal - monthlyPayment+curInterest;
     }
     return amortizedPayments;
-//    let sumYearOne = 0;
-//    for(let i=0; i<12; i++)
-//        sumYearOne += amortizedPayments.arrInterest[i];
-//    console.log(`Year one interest: ${sumYearOne}`);
-//    sumYearOne=0;
-//    for(let i=0; i<12; i++)
-//        sumYearOne += amortizedPayments.arrPrincipal[i];
-//    console.log(`Year one principal: ${sumYearOne}`);
+
+}
+
+function getAnnualSums(objAmortizedPayments, strPayBack)
+{
+    const arrAnnualSums = [];
+    for(let i=0; i<objAmortizedPayments.arrInterest.length; i+=12)
+    {
+        const objAnnuals = {
+            "annualInterest":0,
+            "annualPrincipal":0
+        };
+        let sumAnnualInterest = 0;
+        let sumAnnualPrincipal = 0;
+        for(let j=1, k=i; j<=getNumAnnualPayments(strPayBack); j++, k++)
+        {
+            sumAnnualInterest += objAmortizedPayments.arrInterest[k];
+            sumAnnualPrincipal += objAmortizedPayments.arrPrincipal[k];
+        }
+        objAnnuals["annualInterest"]=sumAnnualInterest;
+        objAnnuals["annualPrincipal"]=sumAnnualPrincipal;
+        arrAnnualSums.push(objAnnuals);
+    }
+    
+    return arrAnnualSums;
+}
+
+function getNumAnnualPayments(strPayBack)
+{
+    switch(strPayBack){
+        case "Every Day":
+            return 365.25;
+            break;
+        case "Every Week":
+            return 52;
+            break;
+        case "Every 2 Weeks":
+            return 26;
+            break;
+        case "Every Half Month":
+            return 24;
+            break;
+        case "Every Month":
+            return 12;
+            break;
+        case "Every Quarter":
+            return 4;
+            break;
+        case "Every 6 Months":
+            return 2;
+            break;
+        default:
+            return 1;
+    }
+}
+
+function showPieGraph(arrAnnualSums)
+{
+    //testing total interest
+    let sumTotalInterest=0;
+    let sumTotalPrincipal = 0;
+    for (let i=0; i<arrAnnualSums.length; i++)
+    {
+        sumTotalInterest += arrAnnualSums[i].annualInterest;
+        sumTotalPrincipal += arrAnnualSums[i].annualPrincipal;
+    }
+    console.log(`Sum Total Interest: ${sumTotalInterest}`);
 }
