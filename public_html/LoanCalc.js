@@ -27,6 +27,8 @@ function calcMonthlyPayment()
     let monthlyPayment = getMonthlyPayment(dblLoanAmount, periodicIntRate, totalNumPayments);
     console.log(`Monthly Payment: ${monthlyPayment}`);
     
+    getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);
+    
     
 //    console.log(`
 //        Loan Amount: ${dblLoanAmount}
@@ -159,3 +161,35 @@ function getMonthlyPayment(a,r,n){
 }
 
 
+function getAmortizedPayments(periodicIntRate, loanAmount, numPayments, monthlyPayment)
+{
+//    const arrIntPayments=[];
+//    const arrPrincipalPayments=[];
+    const amortizedPayments={
+        arrInterest:[],
+        arrPrincipal:[]
+    };
+    
+    let curPrincipal = loanAmount;
+    
+    for(let i=0; i<numPayments; i++)
+    {
+        //get amount of interest. This is a fee so it'll be added back on to the balance/current principal
+        let curInterest = curPrincipal*periodicIntRate;
+        amortizedPayments.arrInterest.push(curInterest);
+        //Amount of montly payment that goes to the principal is monthlypayment - interest
+        //keeping in mind that interest is a fee
+        amortizedPayments.arrPrincipal.push(monthlyPayment-curInterest);
+        //update current principal. Adding on the curInterest as a fee for the loan
+        curPrincipal = curPrincipal - monthlyPayment+curInterest;
+    }
+    return amortizedPayments;
+//    let sumYearOne = 0;
+//    for(let i=0; i<12; i++)
+//        sumYearOne += amortizedPayments.arrInterest[i];
+//    console.log(`Year one interest: ${sumYearOne}`);
+//    sumYearOne=0;
+//    for(let i=0; i<12; i++)
+//        sumYearOne += amortizedPayments.arrPrincipal[i];
+//    console.log(`Year one principal: ${sumYearOne}`);
+}
