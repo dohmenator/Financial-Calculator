@@ -8,7 +8,7 @@ https://www.thebalance.com/loan-payment-calculations-315564
 function calcMonthlyPayment()
 {
     const loanForm = document.querySelector("#frmCalculator");
-    let dblLoanAmount = parseFloat(loanForm.txtLoanAmount.value);
+    let dblLoanAmount = parseFloat(loanForm.txtLoanAmount.value); 
     let intYears = parseInt(loanForm.txtYears.value);
     let intMonths = parseInt(loanForm.txtMonths.value);
     //convert % to decimal then to monthly periodic rate
@@ -19,8 +19,11 @@ function calcMonthlyPayment()
     
     //Get monthly payment using formula:
     let monthlyPayment = getMonthlyPayment(dblLoanAmount, periodicIntRate, totalNumPayments);
-   
-    loanForm.txtMonthlyPayment.value = String(monthlyPayment.toFixed(2));
+    //format monthlyPayment to currency. Save returned value in new value
+    //so you can still do math with 'monthlyPayment'
+    const formattedMonthlyPayment = formatNumber(monthlyPayment);    
+    loanForm.txtMonthlyPayment.value = formattedMonthlyPayment;
+    
     //Separate amount of each payment that pays down the balance and what part is interest
     const objAmortizedPayments = getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);   
     
@@ -31,7 +34,14 @@ function calcMonthlyPayment()
     //Tallying total interest and principal
     let sumTotalInterest=tallyAnnualSums(arrAnnualSums, true);
     let sumTotalPrincipal = tallyAnnualSums(arrAnnualSums, false);
-    loanForm.txtTotalInterest.value = sumTotalInterest.toFixed(2);
+    
+    //Display total interest formatted with comma
+    formattedSumTotalInterest = formatNumber(sumTotalInterest);
+    loanForm.txtTotalInterest.value = formattedSumTotalInterest;
+    
+    //Reformat loan format to currency format
+//    const formattedLoanAmnt = formatNumber(dblLoanAmount);
+//    loanForm.txtLoanAmount.value = formattedLoanAmnt;
     
     showPieGraph(sumTotalInterest, sumTotalPrincipal);    
     
@@ -46,7 +56,13 @@ function calcMonthlyPayment()
 
 }//END calcMonthlyPayment method
 
-
+function formatNumber(curNum)
+{
+    const formattedOptions = {style: 'currency', currency: 'USD'};
+    const numFormat = new Intl.NumberFormat('en-US', formattedOptions);
+    return numFormat.format(curNum);
+    
+}
 /**
  * Helper function to getTotalNumPayments
  * @param {type} someValue
