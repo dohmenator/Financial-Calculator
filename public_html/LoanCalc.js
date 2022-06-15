@@ -16,6 +16,7 @@ function calcMonthlyPayment()
 
     //need to get to total number of payment periods
     let totalNumPayments = getTotalNumPayments(intYears, intMonths);   
+    loanForm.txtTotalMonthlyPayments.value = totalNumPayments;
     
     //Get monthly payment using formula:
     let monthlyPayment = getMonthlyPayment(dblLoanAmount, periodicIntRate, totalNumPayments);
@@ -246,7 +247,8 @@ function showPieGraph(sumTotalInterest, sumTotalPrincipal)
 }
 
 function createAmortizedSchedule(arrAnnualSums, amountBorrowed){
-    console.log(document.querySelector("#tableContainer").childElementCount);
+    //console.log(document.querySelector("#tableContainer").childElementCount);
+    //If table currently exist from previous calcuation, remove it
     if(document.querySelector("#tableContainer").childElementCount > 0)
     {
         //we have a previous table, remove it
@@ -256,6 +258,11 @@ function createAmortizedSchedule(arrAnnualSums, amountBorrowed){
     const tempTable = document.createElement("TABLE");
     tempTable.id = "amortizedTable";
     
+    //Create Caption for table
+    const tempCaption = document.createElement("CAPTION");
+    tempCaption.innerHTML = "Annual Amortized Schedule";
+    tempTable.append(tempCaption);
+    
     //Create ColumnHeadings
     const arrHeadings = ["", "Beginning Balance", "Interest", "Principal", "Ending Balance"];
     const rowHeadings = document.createElement("TR");
@@ -264,9 +271,9 @@ function createAmortizedSchedule(arrAnnualSums, amountBorrowed){
        tempTH.innerHTML = curHeading;
        rowHeadings.append(tempTH);
     });
-    tempTable.append(rowHeadings);
+    tempTable.append(rowHeadings); //add row headings to table
     
-    //Create row for each year
+    //Create row for each year, formatting data as currency for each TD cell created
     for(let i = 0; i<arrAnnualSums.length; i++)
     {
         let tempRow = document.createElement("TR");
