@@ -45,6 +45,7 @@ function calcMonthlyPayment()
     
     showPieGraph(sumTotalInterest, sumTotalPrincipal);    
     
+    createAmortizedSchedule(arrAnnualSums, dblLoanAmount);
 //    console.log(`
 //        Loan Amount: ${dblLoanAmount}
 //        Num Years: ${intYears}
@@ -56,6 +57,11 @@ function calcMonthlyPayment()
 
 }//END calcMonthlyPayment method
 
+/**
+ * Formats 'curNum' to currency US Dollars
+ * @param {type} curNum
+ * @returns formatted number to currency USD
+ */
 function formatNumber(curNum)
 {
     const formattedOptions = {style: 'currency', currency: 'USD'};
@@ -198,6 +204,13 @@ function getAnnualSums(objAmortizedPayments)
     return arrAnnualSums;
 }
 
+/**
+ * Tally total amount of interest and principal. Total interest is displayed 
+ *   as output to the user.  ?Don't think I need to tally total annual principals
+ * @param {type} arrAnnualSums
+ * @param {type} isInterest
+ * @returns {unresolved}
+ */
 function tallyAnnualSums(arrAnnualSums, isInterest){
     if(isInterest)
         return arrAnnualSums.reduce((result,b)=>result + b.annualInterest, 0);
@@ -205,6 +218,8 @@ function tallyAnnualSums(arrAnnualSums, isInterest){
        return arrAnnualSums.reduce((result,b)=>result + b.annualPrincipal, 0); 
     
 }
+
+
 function showPieGraph(sumTotalInterest, sumTotalPrincipal)
 {    
     let interestPercent = (sumTotalInterest/(sumTotalPrincipal+sumTotalInterest)*100);
@@ -228,4 +243,49 @@ function showPieGraph(sumTotalInterest, sumTotalPrincipal)
 	}]
         });
         chart.render();
+}
+
+function createAmortizedSchedule(arrAnnualSums, amountBorrowed){
+    console.log(document.querySelector("#tableContainer").childElementCount);
+    if(document.querySelector("#tableContainer").childElementCount > 0)
+    {
+        //we have a previous table, remove it
+        document.querySelector("#tableContainer").children[0].remove();
+    }
+    //create table
+    const tempTable = document.createElement("TABLE");
+    tempTable.id = "amortizedTable";
+    
+    //Create ColumnHeadings
+    const arrHeadings = ["", "Beginning Balance", "Interest", "Principal", "Ending Balance"];
+    const rowHeadings = document.createElement("TR");
+    arrHeadings.forEach((curHeading)=>{
+       let tempTH = document.createElement("TH");
+       tempTH.innerHTML = curHeading;
+       rowHeadings.append(tempTH);
+    });
+    tempTable.append(rowHeadings);
+    
+    //Create row for each year
+    for(let i = 0; i<arrAnnualSums.length; i++)
+    {
+        let tempRow = document.createElement("TR");
+        tempRow.append(createTD(i+1));
+        tempRow.append(createTD(formatNumber(amountBorrowed)));
+        tempRow.append(createTD(formatNumber(arrAnnualSums[i].annualInterest)));
+        tempRow.append(createTD(formatNumber(arrAnnualSums[i].annualPrincipal)));
+        tempRow.append(createTD(formatNumber(amountBorrowed-arrAnnualSums[i].annualPrincipal)));
+        amountBorrowed -= arrAnnualSums[i].annualPrincipal;
+        tempTable.appendChild(tempRow);
+    }
+    
+    //append table to div container
+    document.querySelector("#tableContainer").append(tempTable);
+}
+
+function createTD(data)
+{
+    tempCell = document.createElement("TD");
+    tempCell.innerHTML=data;
+    return tempCell;
 }
