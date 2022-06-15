@@ -10,8 +10,8 @@
         <link rel="shortcut icon" href="favicon (VHS Hawk).ico">
         <style>
             div{
-                border:solid 1px black;
-                margin:5px;
+/*                border:solid 1px black;
+                margin:5px;*/
             }
             #parent{
                 display:flex;
@@ -42,88 +42,84 @@
             h1{
                 text-align: center;
             }
+            #chartContainer
+            {
+                width:50%;
+                height:50%;
+            }
         </style>
     </head>
     <body>
         <header>
             <h1>Amorized Loan Calculator</h1>
         </header>
-        <div id="parent">
-            <!--<div id="formContainer">-->
-                <form id="frmCalculator" name="frmCalculator">
-                    <fieldset>
-                        <legend>Amortized Loan Inputs</legend>
-                        <label for="txtLoanAmount" class="formLabel">Loan Amount
-                             <input 
-                                type="number" 
-                                placeholder="$" 
-                                id="txtLoanAmount" 
-                                name="txtLoanAmount"
-                                min='1'                                 
-                                 class="formTxtBox">
-                        </label>
-                        <label for="txtLoanTerm" class="formLabel">Loan Term
-                            <input 
-                                type="number" 
-                                placeholder="Years" 
-                                id="txtYears" 
-                                name="txtYears"
-                                min='1'
-                                class="formTxtBox">
-                            <input 
-                                type="number" 
-                                placeholder="Months" 
-                                id="txtMonths" 
-                                name="txtMonths"
-                                min='1'
-                                class="formTxtBox">
-                        </label>
-                        <label for="txtRate" class="formLabel">Interest Rate
-                            <input 
-                                type="number" 
-                                placeholder="%" 
-                                id="txtRate" 
-                                name="txtRate" 
-                                min='1'
-                                class="formTxtBox">
-                        </label>
-                        <label for="selectCompound" class="formLabel">Compound
-                            <select id="selectCompound" name="selectCompound">
-                                <option>Annually(APY)</option><!--Int = r/1-->
-                                <option>Semi-Annually</option><!--Int = r/2-->
-                                <option>Quarterly</option><!--Int = r/4-->
-                                <option selected>Monthly(APR)</option><!--Int = r/12-->
-                                <option>Semi-Monthly</option><!--Int = r/24-->
-                                <option>Biweekly</option><!--Int = r/26-->
-                                <option>Weekly</option><!--Int = r/52-->
-                                <option>Daily</option><!--Int = r/365.25-->
-                                <option>Continuously</option><!--Int = e^r - 1 (here e=exponential constant(Euler's number)-->                               
-                            </select>
-                        </label>
-                        
-                        <label for="selectPayBack" class="formLabel">Pay Back
-                             <select id="selectPayBack" name="selectPayBack">
-                                 <option>Every Day</option><!--365.25 payments/yr-->
-                                 <option>Every Week</option><!--52 payments/yr-->
-                                 <option>Every 2 Weeks</option><!--26 payments/yr-->
-                                 <option>Every Half Month</option><!--24 payments/yr-->
-                                 <option selected>Every Month</option><!--12 payments/yr-->
-                                 <option>Every Quarter</option><!--4 payments/yr-->
-                                 <option>Every 6 Months</option><!--2 payments/yr-->
-                                 <option>Every Year</option><!--1 payment/yr-->                             
-                             </select>
-                        </label>                     
-       
-                        <input type="button" value="Calculate" onClick="calcMonthlyPayment()">
-                        
-                    </fieldset>
-                </form>
-            <!--</div>-->
+        <div id="parent">           
+            <form id="frmCalculator" name="frmCalculator">
+                <fieldset>
+                    <legend>Amortized Loan Inputs</legend>
+                    <label for="txtLoanAmount" class="formLabel">Loan Amount
+                         <input 
+                            type="number" 
+                            placeholder="$" 
+                            id="txtLoanAmount" 
+                            name="txtLoanAmount"
+                            min='1'                                 
+                             class="formTxtBox">
+                    </label>
+                    <label for="txtLoanTerm" class="formLabel">Loan Term
+                        <input 
+                            type="number" 
+                            placeholder="Years" 
+                            id="txtYears" 
+                            name="txtYears"
+                            min='1'
+                            class="formTxtBox">
+                        <input 
+                            type="number" 
+                            placeholder="Months" 
+                            id="txtMonths" 
+                            name="txtMonths"
+                            min='1'
+                            class="formTxtBox">
+                    </label>
+                    <label for="txtRate" class="formLabel">Interest Rate
+                        <input 
+                            type="number" 
+                            placeholder="%" 
+                            id="txtRate" 
+                            name="txtRate" 
+                            min='1'
+                            class="formTxtBox">
+                    </label>
+                    
+                    <p><input type="button" value="Calculate" onClick="calcMonthlyPayment()"></p>
+                    
+                     <label for="txtMonthlyPayment" class="formLabel">Monthly Payment
+                         <input 
+                            type="text" 
+                            placeholder="$" 
+                            id="txtMonthlyPayment" 
+                            name="txtMonthlyPayment"
+                            class="formTxtBox">
+                    </label>
+                    
+                    <label for="txtTotalInterest" class="formLabel">Total Interest
+                         <input 
+                            type="text" 
+                            placeholder="$" 
+                            id="txtTotalInterest" 
+                            name="txtTotalInterest"
+                            class="formTxtBox">
+                    </label>
+                </fieldset>
+            </form>
             
-            <div id="graphContainer">
-                <h1>Graph in Progress</h1>
-            </div>
-        </div>
+            <div id="chartContainer"></div>
+            
+        </div><!-- end parent container -->
+        
         <script src="LoanCalc.js"></script>
+        <!--Include remote script used for graphing results-->
+        <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     </body>
 </html>

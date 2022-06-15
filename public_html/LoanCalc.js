@@ -11,33 +11,29 @@ function calcMonthlyPayment()
     let dblLoanAmount = parseFloat(loanForm.txtLoanAmount.value);
     let intYears = parseInt(loanForm.txtYears.value);
     let intMonths = parseInt(loanForm.txtMonths.value);
-    let dblRate = parseFloat(loanForm.txtRate.value)/100; //convert % to decimal
-    let strCompound = loanForm.selectCompound.options[loanForm.selectCompound.selectedIndex].text;
-    let strPayBack = loanForm.selectPayBack.options[loanForm.selectPayBack.selectedIndex].text;
-    
-    //Get Periodic Interest Rate which is rate/how often rate is compounded
-    let periodicIntRate = getPeriodicRate(strCompound, dblRate);
-    //console.log(`Periodic Int Rate: ${periodicIntRate}`);
-    
+    //convert % to decimal then to monthly periodic rate
+    let periodicIntRate = parseFloat(loanForm.txtRate.value)/100/12; 
+
     //need to get to total number of payment periods
-    let totalNumPayments = getTotalNumPayments(intYears, intMonths, strPayBack);
-    //console.log(`Total Num Payments: ${totalNumPayments}`);    
+    let totalNumPayments = getTotalNumPayments(intYears, intMonths);   
     
     //Get monthly payment using formula:
     let monthlyPayment = getMonthlyPayment(dblLoanAmount, periodicIntRate, totalNumPayments);
-    //console.log(`Monthly Payment: ${monthlyPayment}`);
-    
+   
+    loanForm.txtMonthlyPayment.value = String(monthlyPayment.toFixed(2));
     //Separate amount of each payment that pays down the balance and what part is interest
-    const objAmortizedPayments = getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);
-    //console.log(objAmortizedPayments.arrInterest);
-    //console.log(`Array principal payments: ${objAmortizedPayments.arrPrincipal}`);
+    const objAmortizedPayments = getAmortizedPayments(periodicIntRate, dblLoanAmount, totalNumPayments, monthlyPayment);   
     
     //In order to create an annual amortization table you'll need the annual
     //sums of interest and principal amounts paid out
-    const arrAnnualSums = getAnnualSums(objAmortizedPayments, strPayBack);
-    console.log(arrAnnualSums);
-    showPieGraph(arrAnnualSums);
+    const arrAnnualSums = getAnnualSums(objAmortizedPayments, totalNumPayments);
     
+    //Tallying total interest and principal
+    let sumTotalInterest=tallyAnnualSums(arrAnnualSums, true);
+    let sumTotalPrincipal = tallyAnnualSums(arrAnnualSums, false);
+    loanForm.txtTotalInterest.value = sumTotalInterest.toFixed(2);
+    
+    showPieGraph(sumTotalInterest, sumTotalPrincipal);    
     
 //    console.log(`
 //        Loan Amount: ${dblLoanAmount}
@@ -47,51 +43,9 @@ function calcMonthlyPayment()
 //        Compounded: ${strCompound}
 //        PayBack: ${strPayBack}
 //        `);
+
 }//END calcMonthlyPayment method
 
-/**
- * Period rate is the APR / some scalar depending on how ofter the rate
- *  is compounded
- * @param {type} strCompounded
- * @param {type} rate
- * @returns {Number|undefined}
- */
-function getPeriodicRate(strCompounded, rate){
-    if(isNaN(rate) || !rate || rate<=0){
-        alert("Please enter a valid interest rate");
-        document.querySelector("#txtRate").focus();
-        return;
-    }
-    switch (strCompounded){
-        case "Annually(APY)":
-            return rate;
-            break;
-        case "Semi-Annually":
-            return rate/2;
-            break;
-        case "Quarterly":
-            return rate/4;
-            break;
-        case "Monthly(APR)":
-            return rate/12;
-            break;   
-        case "Semi-Monthly":
-            return rate/24;
-            break;   
-        case "Biweekly":
-            return rate/26;
-            break;   
-        case "Weekly":
-            return rate/52;
-            break;   
-        case "Daily":
-            return rate/365.25;
-            break; 
-        default:
-            //e^r - 1 (here e=exponential constant(Euler's number)
-            return Math.E**rate - 1;    
-    }   
-}
 
 /**
  * Helper function to getTotalNumPayments
@@ -119,53 +73,56 @@ function haveNumber(someValue)
  * @param {type} strPayBack
  * @returns {Number|undefined}
  */
-function getTotalNumPayments(numYears, numMonths, strPayBack){
-    let totalYears = 0;
-    
+function getTotalNumPayments(numYears, numMonths){
+    //let totalYears = 0;
+
     if((!haveNumber(numYears)) && (!haveNumber(numMonths))){
         alert("Please enter a valid term amount");
         document.querySelector("#txtYears").focus();
         return;
     }
     else if(haveNumber(numYears) && haveNumber(numMonths)===false)
-        totalYears = (numYears*12)/12.0;
+        //totalYears = (numYears*12)/12.0;
+        return numYears*12;
     else if(haveNumber(numMonths) && haveNumber(numYears)===false)
-        totalYears = (numMonths)/12.0;
+        //totalYears = (numMonths)/12.0;
+        return numMonths;
     else
-        totalYears = (numYears*12 + numMonths)/12.0;    
+        //totalYears = (numYears*12 + numMonths)/12.0;
+        return numYears*12 + numMonths;
     
-    switch(strPayBack){
-        case "Every Day":
-            return totalYears*365.25;
-            break;
-        case "Every Week":
-            return totalYears*52;
-            break;
-        case "Every 2 Weeks":
-            return totalYears*26;
-            break;
-        case "Every Half Month":
-            return totalYears*24;
-            break;
-        case "Every Month":
-            return totalYears*12;
-            break;
-        case "Every Quarter":
-            return totalYears*4;
-            break;
-        case "Every 6 Months":
-            return totalYears*2;
-            break;
-        default:
-            return totalYears;
-    }
+//    switch(strPayBack){
+//        case "Every Day":
+//            return totalYears*365.25;
+//            break;
+//        case "Every Week":
+//            return totalYears*52;
+//            break;
+//        case "Every 2 Weeks":
+//            return totalYears*26;
+//            break;
+//        case "Every Half Month":
+//            return totalYears*24;
+//            break;
+//        case "Every Month":
+//            return totalYears*12;
+//            break;
+//        case "Every Quarter":
+//            return totalYears*4;
+//            break;
+//        case "Every 6 Months":
+//            return totalYears*2;
+//            break;
+//        default:
+//            return totalYears;
+//    }
 }
 
 function getMonthlyPayment(a,r,n){    
     //plan b: M = PJ / [1-(1+J)^-N] 
     //where P = loan amount, J = periodic int rate N = number of payments
     //Therefore: a=P; r=J; n=N
-    return (a*r)/(1-(1+r)**-n)
+    return a*(r/(1-(1+r)**-n))
     
 }
 
@@ -194,9 +151,10 @@ function getAmortizedPayments(periodicIntRate, loanAmount, numPayments, monthlyP
 
 }
 
-function getAnnualSums(objAmortizedPayments, strPayBack)
+function getAnnualSums(objAmortizedPayments)
 {
     const arrAnnualSums = [];
+    //const numAnnualPayments = getNumAnnualPayments(strPayBack);
     for(let i=0; i<objAmortizedPayments.arrInterest.length; i+=12)
     {
         const objAnnuals = {
@@ -205,10 +163,16 @@ function getAnnualSums(objAmortizedPayments, strPayBack)
         };
         let sumAnnualInterest = 0;
         let sumAnnualPrincipal = 0;
-        for(let j=1, k=i; j<=getNumAnnualPayments(strPayBack); j++, k++)
+        for(let j=1, k=i; j<=12; j++, k++)
         {
-            sumAnnualInterest += objAmortizedPayments.arrInterest[k];
-            sumAnnualPrincipal += objAmortizedPayments.arrPrincipal[k];
+            if(k<objAmortizedPayments.arrInterest.length)
+            {
+                sumAnnualInterest += objAmortizedPayments.arrInterest[k];
+                sumAnnualPrincipal += objAmortizedPayments.arrPrincipal[k];
+            }
+            else
+                break;
+            
         }
         objAnnuals["annualInterest"]=sumAnnualInterest;
         objAnnuals["annualPrincipal"]=sumAnnualPrincipal;
@@ -218,44 +182,34 @@ function getAnnualSums(objAmortizedPayments, strPayBack)
     return arrAnnualSums;
 }
 
-function getNumAnnualPayments(strPayBack)
-{
-    switch(strPayBack){
-        case "Every Day":
-            return 365.25;
-            break;
-        case "Every Week":
-            return 52;
-            break;
-        case "Every 2 Weeks":
-            return 26;
-            break;
-        case "Every Half Month":
-            return 24;
-            break;
-        case "Every Month":
-            return 12;
-            break;
-        case "Every Quarter":
-            return 4;
-            break;
-        case "Every 6 Months":
-            return 2;
-            break;
-        default:
-            return 1;
-    }
+function tallyAnnualSums(arrAnnualSums, isInterest){
+    if(isInterest)
+        return arrAnnualSums.reduce((result,b)=>result + b.annualInterest, 0);
+    else
+       return arrAnnualSums.reduce((result,b)=>result + b.annualPrincipal, 0); 
+    
 }
-
-function showPieGraph(arrAnnualSums)
-{
-    //testing total interest
-    let sumTotalInterest=0;
-    let sumTotalPrincipal = 0;
-    for (let i=0; i<arrAnnualSums.length; i++)
-    {
-        sumTotalInterest += arrAnnualSums[i].annualInterest;
-        sumTotalPrincipal += arrAnnualSums[i].annualPrincipal;
-    }
-    console.log(`Sum Total Interest: ${sumTotalInterest}`);
+function showPieGraph(sumTotalInterest, sumTotalPrincipal)
+{    
+    let interestPercent = (sumTotalInterest/(sumTotalPrincipal+sumTotalInterest)*100);
+    let principalPercent = (sumTotalPrincipal/(sumTotalPrincipal+sumTotalInterest)*100);
+   
+    
+    var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	title: {
+		text: "Interest vs. Principal"
+	},
+	data: [{
+		type: "pie",
+		startAngle: 240,
+		yValueFormatString: "##0\"%\"",
+		indexLabel: "{label} {y}",
+		dataPoints: [
+			{y: principalPercent, label: "Principal"},
+			{y: interestPercent, label: "Interest"}
+		]
+	}]
+        });
+        chart.render();
 }
