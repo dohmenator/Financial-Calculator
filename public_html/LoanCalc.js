@@ -40,10 +40,6 @@ function calcMonthlyPayment()
     formattedSumTotalInterest = formatNumber(sumTotalInterest);
     loanForm.txtTotalInterest.value = formattedSumTotalInterest;
     
-    //Reformat loan format to currency format
-//    const formattedLoanAmnt = formatNumber(dblLoanAmount);
-//    loanForm.txtLoanAmount.value = formattedLoanAmnt;
-    
     showPieGraph(sumTotalInterest, sumTotalPrincipal);    
     
     createAmortizedSchedule(arrAnnualSums, dblLoanAmount);
@@ -68,8 +64,9 @@ function formatNumber(curNum)
     const formattedOptions = {style: 'currency', currency: 'USD'};
     const numFormat = new Intl.NumberFormat('en-US', formattedOptions);
     return numFormat.format(curNum);
-    
 }
+
+
 /**
  * Helper function to getTotalNumPayments
  * @param {type} someValue
@@ -113,32 +110,6 @@ function getTotalNumPayments(numYears, numMonths){
     else
         //totalYears = (numYears*12 + numMonths)/12.0;
         return numYears*12 + numMonths;
-    
-//    switch(strPayBack){
-//        case "Every Day":
-//            return totalYears*365.25;
-//            break;
-//        case "Every Week":
-//            return totalYears*52;
-//            break;
-//        case "Every 2 Weeks":
-//            return totalYears*26;
-//            break;
-//        case "Every Half Month":
-//            return totalYears*24;
-//            break;
-//        case "Every Month":
-//            return totalYears*12;
-//            break;
-//        case "Every Quarter":
-//            return totalYears*4;
-//            break;
-//        case "Every 6 Months":
-//            return totalYears*2;
-//            break;
-//        default:
-//            return totalYears;
-//    }
 }
 
 function getMonthlyPayment(a,r,n){    
@@ -246,6 +217,12 @@ function showPieGraph(sumTotalInterest, sumTotalPrincipal)
         chart.render();
 }
 
+/**
+ * Create a table showing the annual amortized shedule
+ * @param {type} arrAnnualSums
+ * @param {type} amountBorrowed
+ * @returns nothing
+ */
 function createAmortizedSchedule(arrAnnualSums, amountBorrowed){
     //console.log(document.querySelector("#tableContainer").childElementCount);
     //If table currently exist from previous calcuation, remove it
