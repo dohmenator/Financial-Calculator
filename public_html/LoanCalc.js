@@ -53,15 +53,16 @@ function calcMonthlyPayment() {
 
 } //END calcMonthlyPayment method
 
-/**
- * Formats 'curNum' to currency US Dollars
- * @param {type} curNum
- * @returns formatted number to currency USD
- */
 const formatNumber = (() => {
     const formattedOptions = { style: 'currency', currency: 'USD' };
     const numFormat = new Intl.NumberFormat('en-US', formattedOptions);
 
+    /**
+     * Formats 'curNum' to currency US Dollars
+     * 
+     * @param {number} curNum
+     * @returns {string} formatted number to currency USD
+     */
     return (curNum) => numFormat.format(curNum);
 })();
 
