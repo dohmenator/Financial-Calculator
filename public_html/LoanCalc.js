@@ -58,12 +58,12 @@ function calcMonthlyPayment() {
  * @param {type} curNum
  * @returns formatted number to currency USD
  */
-function formatNumber(curNum) {
+const formatNumber = (() => {
     const formattedOptions = { style: 'currency', currency: 'USD' };
     const numFormat = new Intl.NumberFormat('en-US', formattedOptions);
-    return numFormat.format(curNum);
-}
 
+    return (curNum) => numFormat.format(curNum);
+})();
 
 /**
  * Helper function to getTotalNumPayments
